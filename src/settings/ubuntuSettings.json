@@ -92,16 +92,21 @@
       "[concat(parameters('templateBaseUrl'), 'scripts/data-node-install.sh')]"
     ],
     "ubuntuSkus": {
-      "2": "14.04-LTS",
+      "2": "14.04.5-LTS",
       "5": "16.04-LTS"
     },
+    "ubuntuSkuVersions": {
+      "2": "14.04.201801100",
+      "5": "latest"
+    },
     "ubuntuSku": "[variables('ubuntuSkus')[substring(parameters('esSettings').version, 0, 1)]]",
+    "ubuntuSkuVersion": "[variables('ubuntuSkuVersions')[substring(parameters('esSettings').version, 0, 1)]]",
     "ubuntuSettings": {
       "imageReference": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
         "sku": "[variables('ubuntuSku')]",
-        "version": "latest"
+        "version": "[variables('ubuntuSkuVersion')]"
       },
       "managementPort": "22",
       "extensionSettings": {
