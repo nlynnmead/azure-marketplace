@@ -234,6 +234,9 @@
       "type": "string",
       "defaultValue": "Standard_D1",
       "allowedValues": [
+        "Standard_D2S_v3",
+        "Standard_D4S_v3",
+        "Standard_D8S_v3",
         "Standard_A0",
         "Standard_A1",
         "Standard_A2",
@@ -950,6 +953,18 @@
       },
       "Standard_DS2_v2": {
         "dataDisks": 4,
+        "storageAccountType": "Premium_LRS"
+      },
+      "Standard_D2S_v3": {
+        "dataDisks": 4,
+        "storageAccountType": "Premium_LRS"
+      },
+      "Standard_D4S_v3": {
+        "dataDisks": 8,
+        "storageAccountType": "Premium_LRS"
+      },
+      "Standard_D8S_v3": {
+        "dataDisks": 16,
         "storageAccountType": "Premium_LRS"
       },
       "Standard_DS3_v2": {
