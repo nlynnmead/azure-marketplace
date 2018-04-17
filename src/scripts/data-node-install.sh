@@ -18,6 +18,7 @@ help()
     echo "-n elasticsearch cluster name"
     echo "-v elasticsearch version 2.3.3"
     echo "-p hostname prefix of nodes for unicast discovery"
+    echo "-m heap size in megabytes to allocate to JVM"
 
     echo "-d cluster uses dedicated masters"
     echo "-Z <number of nodes> hint to the install script how many data nodes we are provisioning"
@@ -26,7 +27,7 @@ help()
     echo "-A admin password"
     echo "-R read password"
     echo "-K kibana user password"
-    echo "-S kibana server password"
+    echo "-S logstash_system user password"
     echo "-X enable anonymous access with monitoring role (for health probes)"
 
     echo "-l install plugins"
@@ -63,8 +64,9 @@ log "Begin execution of Data Node Install script extension"
 
 CLUSTER_NAME="elasticsearch"
 NAMESPACE_PREFIX=""
-ES_VERSION="5.3.0"
-INSTALL_PLUGINS=0
+ES_VERSION="6.2.2"
+ES_HEAP=0
+INSTALL_XPACK=0
 INSTALL_ADDITIONAL_PLUGINS=""
 YAML_CONFIGURATION=""
 INSTALL_AZURECLOUD_PLUGIN=0
@@ -74,10 +76,10 @@ CLUSTER_USES_DEDICATED_MASTERS=0
 DATANODE_COUNT=0
 DATA_ONLY_NODE=0
 
-USER_ADMIN_PWD="changeME"
-USER_READ_PWD="changeME"
-USER_KIBANA4_PWD="changeME"
-USER_KIBANA4_SERVER_PWD="changeME"
+USER_ADMIN_PWD="changeme"
+USER_READ_PWD="changeme"
+USER_KIBANA_PWD="changeme"
+BOOTSTRAP_PASSWORD="changeme"
 ANONYMOUS_ACCESS=0
 
 API_URL=""
@@ -92,7 +94,7 @@ COUNTRY=""
 INSTALL_SWITCHES=""
 
 #Loop through options passed
-while getopts :n:v:A:R:K:S:Z:p:U:I:c:e:f:m:t:s:o:a:k:L:C:Xxyzldjh optname; do
+while getopts :n:m:v:A:R:K:S:Z:p:U:I:c:e:f:g:t:s:o:a:k:L:C:B:Xxyzldjh optname; do
   log "Option $optname set"
   case $optname in
     n) #set cluster name
@@ -101,6 +103,9 @@ while getopts :n:v:A:R:K:S:Z:p:U:I:c:e:f:m:t:s:o:a:k:L:C:Xxyzldjh optname; do
     v) #elasticsearch version number
       ES_VERSION="${OPTARG}"
       ;;
+    m) #heap_size
+      ES_HEAP=${OPTARG}
+      ;;
     A) #security admin pwd
       USER_ADMIN_PWD="${OPTARG}"
       ;;
@@ -108,10 +113,13 @@ while getopts :n:v:A:R:K:S:Z:p:U:I:c:e:f:m:t:s:o:a:k:L:C:Xxyzldjh optname; do
       USER_READ_PWD="${OPTARG}"
       ;;
     K) #security kibana user pwd
-      USER_KIBANA4_PWD="${OPTARG}"
+      USER_KIBANA_PWD="${OPTARG}"
       ;;
-    S) #security kibana server pwd
-      USER_KIBANA4_SERVER_PWD="${OPTARG}"
+    S) #security logstash_system user pwd
+      USER_LOGSTASH_PWD="${OPTARG}"
+      ;;
+    B) #bootstrap password
+      BOOTSTRAP_PASSWORD="${OPTARG}"
       ;;
     X) #anonymous access
       ANONYMOUS_ACCESS=1
@@ -119,8 +127,8 @@ while getopts :n:v:A:R:K:S:Z:p:U:I:c:e:f:m:t:s:o:a:k:L:C:Xxyzldjh optname; do
     Z) #number of data nodes hints (used to calculate minimum master nodes)
       DATANODE_COUNT=${OPTARG}
       ;;
-    l) #install plugins
-      INSTALL_PLUGINS=1
+    l) #install X-Pack
+      INSTALL_XPACK=1
       ;;
     j) #install azure cloud plugin
       INSTALL_AZURECLOUD_PLUGIN=1
@@ -167,7 +175,7 @@ while getopts :n:v:A:R:K:S:Z:p:U:I:c:e:f:m:t:s:o:a:k:L:C:Xxyzldjh optname; do
     f) #set first name
       FIRST_NAME="${OPTARG}"
       ;;
-    m) #set last name
+    g) #set last name
       LAST_NAME="${OPTARG}"
       ;;
     t) #set job title
@@ -203,7 +211,7 @@ if [ $INSTALL_AZURECLOUD_PLUGIN -eq 1 ]; then
   INSTALL_SWITCHES="$INSTALL_SWITCHES -j"
 fi
 
-if [ $INSTALL_PLUGINS -eq 1 ]; then
+if [ $INSTALL_XPACK -eq 1 ]; then
   INSTALL_SWITCHES="$INSTALL_SWITCHES -l"
 fi
 
@@ -212,7 +220,7 @@ if [ $ANONYMOUS_ACCESS -eq 1 ]; then
 fi
 
 # install elasticsearch
-bash elasticsearch-ubuntu-install.sh -n "$CLUSTER_NAME" -v "$ES_VERSION" -A "$USER_ADMIN_PWD" -R "$USER_READ_PWD" -K "$USER_KIBANA4_PWD" -S "$USER_KIBANA4_SERVER_PWD" -Z "$DATANODE_COUNT" -p "$NAMESPACE_PREFIX" -a "$STORAGE_ACCOUNT" -k "$STORAGE_KEY" -L "$INSTALL_ADDITIONAL_PLUGINS" -C "$YAML_CONFIGURATION" $INSTALL_SWITCHES
+bash elasticsearch-ubuntu-install.sh -n "$CLUSTER_NAME" -m $ES_HEAP -v "$ES_VERSION" -A "$USER_ADMIN_PWD" -R "$USER_READ_PWD" -K "$USER_KIBANA_PWD" -S "$USER_LOGSTASH_PWD" -B "$BOOTSTRAP_PASSWORD" -Z "$DATANODE_COUNT" -p "$NAMESPACE_PREFIX" -a "$STORAGE_ACCOUNT" -k "$STORAGE_KEY" -L "$INSTALL_ADDITIONAL_PLUGINS" -C "$YAML_CONFIGURATION" $INSTALL_SWITCHES
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   log "installing Elasticsearch returned exit code $EXIT_CODE"
