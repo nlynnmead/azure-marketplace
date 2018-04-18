@@ -94,11 +94,11 @@
     "ubuntuSkus": {
       "2": "14.04.5-LTS",
       "5": "16.04-LTS",
-      "6": "16.04-LTS"
+      "6": "14.04.5-LTS",
     },
     "ubuntuSkuVersions": {
       "2": "14.04.201801100",
-      "5": "latest"
+      "6": "14.04.201801100""
     },
     "ubuntuSku": "[variables('ubuntuSkus')[substring(parameters('esSettings').version, 0, 1)]]",
     "ubuntuSkuVersion": "[variables('ubuntuSkuVersions')[substring(parameters('esSettings').version, 0, 1)]]",
